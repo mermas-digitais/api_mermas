@@ -15,6 +15,10 @@ mongoose.connect(
   console.log('Connection failed')
 })
 
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+
+
 app.use('/api', routes);
 
 app.listen(3333, function () {
