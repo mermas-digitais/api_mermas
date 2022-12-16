@@ -13,7 +13,7 @@ module.exports = {
       password: hashedPassword,
     });
 
-    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET_KEY, {
+    const token = jwt.sign({ id: user._id, email: user.email, isAdmin: user.isAdmin }, process.env.JWT_SECRET_KEY, {
       expiresIn: '1d',
     });
 
@@ -28,6 +28,7 @@ module.exports = {
       email,
     });
 
+
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
     }
@@ -36,13 +37,19 @@ module.exports = {
       return res.status(400).json({ message: 'Invalid password' });
     }
 
-    const token = jwt.sign({ id: user.email }, process.env.JWT_SECRET_KEY, {
+    const token = jwt.sign({ id: user._id, email: user.email, isAdmin: user.isAdmin }, process.env.JWT_SECRET_KEY, {
       expiresIn: '1d',
     });
 
     return res.json({ user, token });
   },
 
+  logout: async (req, res) => {
+    return res.json({
+      message: 'Logout successfully',
+      token: null,
+    })
+  },
   validateToken: async (req, res) => {
     const { token } = req.body;
     if (!token) {
