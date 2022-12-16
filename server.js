@@ -1,12 +1,18 @@
 var express = require('express')
 const mongoose = require('mongoose')
-app = express()
+const cloudinaryConfig = require('./config/cloudinary.js')
+const bodyParser = require('body-parser')
 const dotenv = require('dotenv')
+
+app = express()
+app.use(
+  express.urlencoded({
+    extended: true,
+
+  })
+);
+app.use(express.json());
 dotenv.config()
-
-const routes = require('./routers/PublicationRouter.js')
-
-
 mongoose.connect(
   process.env.MONGODBURL,
 ).then(() => {
@@ -15,13 +21,10 @@ mongoose.connect(
   console.log('Connection failed')
 })
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-
-
-app.use('/api', routes);
+app.use('/api', require('./routers/PublicationRouter.js'));
 
 app.use('/api/auth', require('./routers/auth.js'));
+
 
 app.listen(3333, function () {
   console.log('Server is running on port 3333')
