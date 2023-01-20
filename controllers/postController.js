@@ -23,6 +23,7 @@ module.exports = {
   },
 
   uploadImage: async (req, res) => {
+    console.log("chamei")
     try {
       const files = req.files;
       const images = [];

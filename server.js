@@ -26,7 +26,7 @@ app.use('/api', require('./routers/PublicationRouter.js'));
 app.use('/api/auth', require('./routers/auth.js'));
 
 
-app.listen(3333, function () {
+app.listen(process.env.PORT, function () {
   console.log('Server is running on port 3333')
 })
 
