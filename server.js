@@ -13,6 +13,7 @@ app.use(
 );
 app.use(express.json());
 dotenv.config()
+mongoose.set('strictQuery', false)
 mongoose.connect(
   process.env.MONGODBURL,
 ).then(() => {
