@@ -6,6 +6,15 @@ const jwt = require('jsonwebtoken');
 module.exports = {
   register: async (req, res) => {
     const { email, password } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email not found' });
+    }
+
+    if (!password) {
+      return res.status(400).json({ message: 'Password not found' });
+    }
+
     const hashedPassword = await bcryptjs.hash(password, 10);
     const user = await UserSchema.create({
       _id: new mongoose.Types.ObjectId(),
@@ -24,6 +33,15 @@ module.exports = {
 
   login: async (req, res) => {
     const { email, password } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email not found' });
+    }
+
+    if (!password) {
+      return res.status(400).json({ message: 'Password not found' });
+    }
+
     const user = await UserSchema.findOne({
       email,
     });
@@ -73,6 +91,11 @@ module.exports = {
 
   renewToken: async (req, res) => {
     const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email não encontrado' });
+    }
+
     const user = await UserSchema.findOne({
       email,
     });

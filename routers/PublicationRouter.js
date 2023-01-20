@@ -22,8 +22,11 @@ router.get('/', (req, res) => {
   res.json({ message: 'Welcome to my API' });
 });
 router.post('/uploadImage', upload.array('images', 4), PostController.uploadImage);
-router.post('/createPost', verifyToken, PostController.createPost);
+router.post('/createPost', upload.array('images', 4), PostController.createPost);
 router.get('/getPost', PostController.getPost);
+router.get('/getPostById/:id', PostController.getPostById);
+router.put('/editPost/:id', PostController.editPost);
+router.delete('/deletePost/:id', PostController.deletePost);
 
 
 
