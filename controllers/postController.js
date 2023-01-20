@@ -1,4 +1,5 @@
 const Post = require('../models/postModel');
+const sharp = require('sharp');
 const mongoose = require('mongoose');
 const cloudinaryConfig = require('../config/cloudinary.js');
 module.exports = {
@@ -22,23 +23,32 @@ module.exports = {
   },
 
   uploadImage: async (req, res) => {
-    console.log("chamei o upload")
-    console.log(req.body)
-    // try {
-
-    //   // const result = await cloudinaryConfig.uploader.upload(image, {
-    //   //   public_id: 'image',
-    //   //   width: 500,
-    //   //   crop: "scale"
-
-
-
-    //   // });
-    //   // return res.json(result);
-    // } catch (err) {
-    //   console.log(err);
-    //   return res.status(500).json({ msg: 'Something went wrong' });
-    // }
+    try {
+      const files = req.files;
+      const images = [];
+      for (const file of files) {
+        const base64 = file.buffer.toString('base64');
+        const uploadStr = "data:image/png;base64," + base64;
+        const { secure_url } = await cloudinaryConfig.uploader.upload(uploadStr, {
+          overwrite: true,
+          invalidate: true,
+          width: 810, height: 456, crop: "fill"
+        });
+        images.push({
+          url: secure_url,
+          public_id: secure_url
+        });
+      }
+      return res.json(
+        {
+          images: images,
+          msg: 'Images uploaded successfully'
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ msg: 'Something went wrong' });
+    }
   },
 
 

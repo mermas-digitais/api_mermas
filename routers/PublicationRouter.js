@@ -21,14 +21,7 @@ const upload = multer({
 router.get('/', (req, res) => {
   res.json({ message: 'Welcome to my API' });
 });
-router.post('/uploadImage', upload.array('images', 4), (req, res) => {
-  try {
-    res.send(req.files)
-  }
-  catch (e) {
-    res.status(400).send(e)
-  }
-});
+router.post('/uploadImage', upload.array('images', 4), PostController.uploadImage);
 router.post('/createPost', verifyToken, PostController.createPost);
 router.get('/getPost', PostController.getPost);
 
