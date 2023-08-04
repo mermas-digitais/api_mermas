@@ -109,7 +109,7 @@ module.exports = {
         const { secure_url } = await cloudinaryConfig.uploader.upload(uploadStr, {
           overwrite: true,
           invalidate: true,
-          width: 456, height: 810, crop: "fill"
+          // width: 456, height: 810, crop: "fill"
         });
         images.push({
           url: secure_url,
