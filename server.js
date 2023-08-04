@@ -11,6 +11,7 @@ app.use(
 
   })
 );
+
 app.use(express.json());
 dotenv.config()
 mongoose.set('strictQuery', false)
@@ -28,7 +29,7 @@ app.use('/api/auth', require('./routers/auth.js'));
 
 
 app.listen(process.env.PORT, function () {
-  console.log('Server is running on port 3333')
+  console.log('http://localhost:8080')
 })
 
 

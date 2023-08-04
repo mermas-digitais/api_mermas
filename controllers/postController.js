@@ -2,6 +2,7 @@ const Post = require('../models/postModel');
 const sharp = require('sharp');
 const mongoose = require('mongoose');
 const cloudinaryConfig = require('../config/cloudinary.js');
+const dayjs = require('dayjs');
 
 
 // uploadImage: async (req, res) => {
@@ -68,6 +69,7 @@ module.exports = {
 
     const images = await uploadImage(files);
 
+    console.log(images);
     if (!TitlePost) return res.status(400).send(`Titulo não encontrado`);
 
     if (!DescriptionPost) return res.status(400).send(`Descrição não encontrada`);
@@ -95,7 +97,13 @@ module.exports = {
   getPostById: async (req, res) => {
     const { id } = req.params;
     const post = await Post.findById(id);
-    return res.json(post);
+    return res.json({
+      createPost: dayjs(post.createPost).format('DD/MM/YYYY'),
+      PicturePost: post.PicturePost,
+      TitlePost: post.TitlePost,
+      DescriptionPost: post.DescriptionPost,
+      _id: post._id,
+    });
   },
 
   editPost: async (req, res) => {
