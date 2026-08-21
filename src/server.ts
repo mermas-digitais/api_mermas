@@ -12,6 +12,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+app.set('trust proxy', true);
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL || true,
@@ -23,8 +25,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  const host = req.get('host');
-  const protocol = req.protocol;
+  const host = req.get('host') || '';
+  const protocol = req.headers['x-forwarded-proto'] || (host.includes('localhost') ? 'http' : 'https');
   const baseUrl = `${protocol}://${host}`;
 
   res.json({
