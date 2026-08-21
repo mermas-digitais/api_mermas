@@ -22,84 +22,26 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/', (req, res) => {
+  const host = req.get('host');
+  const protocol = req.protocol;
+  const baseUrl = `${protocol}://${host}`;
 
-/**
- * @openapi
- * /api/v1/health:
- *   get:
- *     summary: Healthcheck da API
- *     tags: [Geral]
- *     security: []
- *     responses:
- *       200:
- *         description: API online e operacional
- *
- * /api/v1/auth/sign-up/email:
- *   post:
- *     summary: Cadastrar novo usuário
- *     tags: [Autenticação]
- *     security: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [email, password, name]
- *             properties:
- *               name:
- *                 type: string
- *                 example: Maria Silva
- *               email:
- *                 type: string
- *                 example: maria@mermas.com
- *               password:
- *                 type: string
- *                 example: senhaSegura123
- *     responses:
- *       200:
- *         description: Usuário cadastrado com sucesso
- *
- * /api/v1/auth/sign-in/email:
- *   post:
- *     summary: Autenticar usuário com e-mail e senha
- *     tags: [Autenticação]
- *     security: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [email, password]
- *             properties:
- *               email:
- *                 type: string
- *                 example: maria@mermas.com
- *               password:
- *                 type: string
- *                 example: senhaSegura123
- *     responses:
- *       200:
- *         description: Login bem-sucedido e sessão criada
- *
- * /api/v1/auth/get-session:
- *   get:
- *     summary: Obter dados da sessão do usuário autenticado
- *     tags: [Autenticação]
- *     responses:
- *       200:
- *         description: Dados do usuário e da sessão
- *
- * /api/v1/auth/sign-out:
- *   post:
- *     summary: Encerrar sessão do usuário (Logout)
- *     tags: [Autenticação]
- *     responses:
- *       200:
- *         description: Sessão encerrada com sucesso
- */
+  res.json({
+    name: 'API Mermas - Acervo Digital',
+    version: '1.0.0',
+    status: 'online',
+    docs: `${baseUrl}/api/v1/docs`,
+    endpoints: {
+      health: `${baseUrl}/api/v1/health`,
+      docs: `${baseUrl}/api/v1/docs`,
+      auth: `${baseUrl}/api/v1/auth`,
+      acervo: `${baseUrl}/api/v1/acervo`,
+    },
+  });
+});
+
+app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/api/v1/health', (_req, res) => {
   res.json({ status: 'ok', message: 'API Mermas Acervo v1 online' });
