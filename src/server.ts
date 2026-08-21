@@ -26,7 +26,10 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
   const host = req.get('host') || '';
-  const protocol = req.headers['x-forwarded-proto'] || (host.includes('localhost') ? 'http' : 'https');
+  const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+  const rawProto = req.headers['x-forwarded-proto'];
+  const reqProto = Array.isArray(rawProto) ? rawProto[0] : rawProto || req.protocol;
+  const protocol = isLocal ? reqProto : 'https';
   const baseUrl = `${protocol}://${host}`;
 
   res.json({
