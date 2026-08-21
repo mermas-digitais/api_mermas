@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 
 export interface CrossRefAuthor {
-  name: string;
+  name?: string;
+  given?: string;
+  family?: string;
   sequence: string;
   affiliation: { name: string }[];
 }
@@ -30,6 +32,26 @@ export interface DOIMetadata {
   source: 'crossref';
 }
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .trim();
+}
+
+function formatAuthor(author: CrossRefAuthor): string {
+  if (author.name) return author.name;
+  if (author.given && author.family) return `${author.given} ${author.family}`;
+  if (author.family) return author.family;
+  if (author.given) return author.given;
+  return '';
+}
+
 async function fetchFromCrossRef(doi: string): Promise<DOIMetadata | null> {
   const cleanDoi = doi.trim().replace(/^https?:\/\/doi\.org\//, '');
 
@@ -51,12 +73,16 @@ async function fetchFromCrossRef(doi: string): Promise<DOIMetadata | null> {
     ? work['container-title'][0]
     : work['container-title'] || '';
 
-  const authors = (work.author || []).map((a) => a.name).filter(Boolean);
+  const authors = (work.author || [])
+    .map(formatAuthor)
+    .filter(Boolean);
 
   const year =
     work.published?.['date-parts']?.[0]?.[0] ||
     work['published-online']?.['date-parts']?.[0]?.[0] ||
     null;
+
+  const abstract = work.abstract ? stripHtml(work.abstract) : null;
 
   return {
     doi: work.DOI || cleanDoi,
@@ -66,7 +92,7 @@ async function fetchFromCrossRef(doi: string): Promise<DOIMetadata | null> {
     type: work.type || 'journal-article',
     year,
     url: work.URL || `https://doi.org/${cleanDoi}`,
-    abstract: work.abstract || null,
+    abstract,
     source: 'crossref',
   };
 }
