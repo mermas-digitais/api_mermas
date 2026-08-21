@@ -37,20 +37,27 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     status: 'online',
     docs: `${baseUrl}/api/v1/docs`,
+    openapi_json: `${baseUrl}/api/v1/openapi.json`,
     endpoints: {
       health: `${baseUrl}/api/v1/health`,
       docs: `${baseUrl}/api/v1/docs`,
+      openapi_json: `${baseUrl}/api/v1/openapi.json`,
       auth: `${baseUrl}/api/v1/auth`,
       acervo: `${baseUrl}/api/v1/acervo`,
     },
   });
 });
 
-app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 app.get('/api/v1/health', (_req, res) => {
   res.json({ status: 'ok', message: 'API Mermas Acervo v1 online' });
 });
+
+app.get('/api/v1/openapi.json', (_req, res) => {
+  res.setHeader('Content-Disposition', 'attachment; filename="openapi.json"');
+  res.json(swaggerSpec);
+});
+
+app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.all('/api/v1/auth/*', toNodeHandler(auth));
 
@@ -60,6 +67,7 @@ if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log(`Swagger Docs available at http://localhost:${PORT}/api/v1/docs`);
+    console.log(`OpenAPI JSON available at http://localhost:${PORT}/api/v1/openapi.json`);
   });
 }
 

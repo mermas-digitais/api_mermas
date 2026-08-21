@@ -12,16 +12,28 @@ export const swaggerSpec = {
     title: 'API Mermas - Acervo Digital',
     version: '1.0.0',
     description: 'API RESTful para gestão do Acervo Mermas (jogos, artigos, materiais de aula e certificados) com autenticação via Better Auth e armazenamento em Garage S3.',
+    contact: {
+      name: 'Mermas Digital',
+      url: 'https://www.mermasdigitais.com.br',
+    },
+    license: {
+      name: 'ISC',
+    },
   },
   servers: [
     {
       url: prodUrl,
-      description: 'Servidor de Produção',
+      description: 'Produção',
     },
     {
       url: localUrl,
-      description: 'Servidor Local',
+      description: 'Desenvolvimento Local',
     },
+  ],
+  tags: [
+    { name: 'Geral', description: 'Endpoints de verificação e status da API' },
+    { name: 'Autenticação', description: 'Cadastros, logins e gerenciamento de sessão via Better Auth' },
+    { name: 'Acervo', description: 'Gestão de itens do acervo (jogos, artigos, materiais, certificados)' },
   ],
   security: [
     { bearerAuth: [] },
@@ -60,7 +72,7 @@ export const swaggerSpec = {
             items: { $ref: '#/components/schemas/FileMetadata' },
           },
           attachment: {
-            $ref: '#/components/schemas/FileMetadata',
+            ...{ $ref: '#/components/schemas/FileMetadata' },
             nullable: true,
           },
           userId: { type: 'string', nullable: true, example: 'user_12345' },
