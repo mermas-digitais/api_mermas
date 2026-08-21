@@ -14,9 +14,29 @@ const PORT = process.env.PORT || 8080;
 
 app.set('trust proxy', true);
 
+const allowedOrigins = [
+  'https://www.mermasdigitais.com.br',
+  'https://mermasdigitais.com.br',
+];
+
+if (process.env.CLIENT_URL) {
+  const extraOrigins = process.env.CLIENT_URL.split(',').map((url) => url.trim());
+  allowedOrigins.push(...extraOrigins);
+}
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || true,
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        process.env.NODE_ENV !== 'production'
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Bloqueado pelo CORS: Origem não permitida.'));
+      }
+    },
     credentials: true,
   })
 );
