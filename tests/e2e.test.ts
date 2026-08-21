@@ -108,13 +108,42 @@ describe('Suíte E2E: Fluxo Completo de Usuário e Acervo', () => {
     }
   });
 
-  it('5. Deve listar todos os itens do acervo', async () => {
-    const res = await request(app).get('/api/v1/acervo');
+  it('5. Deve listar itens do acervo com paginação', async () => {
+    const res = await request(app).get('/api/v1/acervo?page=1&limit=10');
     expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.data).toBeDefined();
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.pagination).toBeDefined();
+    expect(res.body.pagination.page).toBe(1);
+    expect(res.body.pagination.limit).toBe(10);
+    expect(typeof res.body.pagination.total).toBe('number');
+    expect(typeof res.body.pagination.totalPages).toBe('number');
+    expect(typeof res.body.pagination.hasNext).toBe('boolean');
+    expect(typeof res.body.pagination.hasPrev).toBe('boolean');
   });
 
-  it('6. Deve buscar metadados de artigo via DOI', async () => {
+  it('6. Deve filtrar itens por tipo', async () => {
+    const res = await request(app).get('/api/v1/acervo?type=jogo');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toBeDefined();
+    expect(res.body.pagination).toBeDefined();
+  });
+
+  it('7. Deve ordenar itens por título asc', async () => {
+    const res = await request(app).get('/api/v1/acervo?sortBy=title&order=asc');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toBeDefined();
+    expect(res.body.pagination).toBeDefined();
+  });
+
+  it('8. Deve filtrar por período de data', async () => {
+    const res = await request(app).get('/api/v1/acervo?from=2026-01-01&to=2026-12-31');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toBeDefined();
+    expect(res.body.pagination).toBeDefined();
+  });
+
+  it('9. Deve buscar metadados de artigo via DOI', async () => {
     const res = await request(app).get('/api/v1/doi?doi=10.1038/nature12373');
     expect(res.status).toBe(200);
     expect(res.body.doi).toBe('10.1038/nature12373');

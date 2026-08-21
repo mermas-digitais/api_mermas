@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { eq, desc, and, ilike } from 'drizzle-orm';
+import { eq, desc, asc, and, ilike, gte, lte, sql, count } from 'drizzle-orm';
 import { db } from '../db';
 import { acervo, acervoTypes, AcervoType } from '../db/schema';
 import { uploadToS3, deleteFromS3, FileMetadata } from '../utils/s3Upload';
@@ -18,6 +18,12 @@ function parseAuthors(input: any): string[] {
   }
   return [];
 }
+
+const SORT_FIELDS = {
+  createdAt: acervo.createdAt,
+  updatedAt: acervo.updatedAt,
+  title: acervo.title,
+} as const;
 
 export const acervoController = {
   createItem: async (req: AuthenticatedRequest, res: Response) => {
@@ -78,7 +84,21 @@ export const acervoController = {
 
   getItems: async (req: Request, res: Response) => {
     try {
-      const { type, search } = req.query;
+      const {
+        page = '1',
+        limit = '20',
+        type,
+        search,
+        sortBy = 'createdAt',
+        order = 'desc',
+        from,
+        to,
+        dateField = 'createdAt',
+      } = req.query;
+
+      const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20));
+      const offset = (pageNum - 1) * limitNum;
 
       const filters = [];
 
@@ -90,14 +110,46 @@ export const acervoController = {
         filters.push(ilike(acervo.title, `%${search}%`));
       }
 
-      const query = db
+      const dateCol = dateField === 'updatedAt' ? acervo.updatedAt : acervo.createdAt;
+      if (from && typeof from === 'string') {
+        filters.push(gte(dateCol, new Date(from)));
+      }
+      if (to && typeof to === 'string') {
+        filters.push(lte(dateCol, new Date(to)));
+      }
+
+      const whereClause = filters.length > 0 ? and(...filters) : undefined;
+
+      const sortCol = SORT_FIELDS[sortBy as keyof typeof SORT_FIELDS] || acervo.createdAt;
+      const orderFn = order === 'asc' ? asc : desc;
+
+      const [countResult] = await db
+        .select({ total: count() })
+        .from(acervo)
+        .where(whereClause);
+
+      const total = countResult?.total || 0;
+      const totalPages = Math.ceil(total / limitNum);
+
+      const data = await db
         .select()
         .from(acervo)
-        .where(filters.length > 0 ? and(...filters) : undefined)
-        .orderBy(desc(acervo.createdAt));
+        .where(whereClause)
+        .orderBy(orderFn(sortCol))
+        .limit(limitNum)
+        .offset(offset);
 
-      const items = await query;
-      return res.json(items);
+      return res.json({
+        data,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages,
+          hasNext: pageNum < totalPages,
+          hasPrev: pageNum > 1,
+        },
+      });
     } catch (error: any) {
       return res.status(500).json({ message: error.message || 'Erro ao listar acervo' });
     }

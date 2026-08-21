@@ -75,6 +75,26 @@ export const swaggerSpec = {
           updatedAt: { type: 'string', format: 'date-time', example: '2026-08-21T04:30:00.000Z' },
         },
       },
+      AcervoPaginatedResponse: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/AcervoItem' },
+          },
+          pagination: {
+            type: 'object',
+            properties: {
+              total: { type: 'number', example: 150, description: 'Total de itens encontrados' },
+              page: { type: 'number', example: 1, description: 'Página atual' },
+              limit: { type: 'number', example: 20, description: 'Itens por página' },
+              totalPages: { type: 'number', example: 8, description: 'Total de páginas' },
+              hasNext: { type: 'boolean', example: true, description: 'Existe próxima página' },
+              hasPrev: { type: 'boolean', example: false, description: 'Existe página anterior' },
+            },
+          },
+        },
+      },
       DOIMetadata: {
         type: 'object',
         properties: {
@@ -290,10 +310,22 @@ export const swaggerSpec = {
     },
     '/api/v1/acervo': {
       get: {
-        summary: 'Listar itens do acervo',
+        summary: 'Listar itens do acervo com paginação, filtros e ordenação',
         tags: ['Acervo'],
         security: [],
         parameters: [
+          {
+            in: 'query',
+            name: 'page',
+            schema: { type: 'number', default: 1 },
+            description: 'Página atual',
+          },
+          {
+            in: 'query',
+            name: 'limit',
+            schema: { type: 'number', default: 20, maximum: 100 },
+            description: 'Itens por página (máx: 100)',
+          },
           {
             in: 'query',
             name: 'type',
@@ -306,16 +338,45 @@ export const swaggerSpec = {
             schema: { type: 'string' },
             description: 'Busca por palavra-chave no título',
           },
+          {
+            in: 'query',
+            name: 'sortBy',
+            schema: { type: 'string', enum: ['createdAt', 'updatedAt', 'title'], default: 'createdAt' },
+            description: 'Campo para ordenação',
+          },
+          {
+            in: 'query',
+            name: 'order',
+            schema: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
+            description: 'Direção da ordenação',
+          },
+          {
+            in: 'query',
+            name: 'from',
+            schema: { type: 'string', format: 'date' },
+            description: 'Data inicial do filtro (ISO 8601: 2026-01-01)',
+            example: '2026-01-01',
+          },
+          {
+            in: 'query',
+            name: 'to',
+            schema: { type: 'string', format: 'date' },
+            description: 'Data final do filtro (ISO 8601: 2026-12-31)',
+            example: '2026-12-31',
+          },
+          {
+            in: 'query',
+            name: 'dateField',
+            schema: { type: 'string', enum: ['createdAt', 'updatedAt'], default: 'createdAt' },
+            description: 'Campo de data para o filtro de período',
+          },
         ],
         responses: {
           '200': {
-            description: 'Lista de itens do acervo',
+            description: 'Lista paginada de itens do acervo',
             content: {
               'application/json': {
-                schema: {
-                  type: 'array',
-                  items: { $ref: '#/components/schemas/AcervoItem' },
-                },
+                schema: { $ref: '#/components/schemas/AcervoPaginatedResponse' },
               },
             },
           },
