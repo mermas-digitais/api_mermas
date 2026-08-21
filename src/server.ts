@@ -5,6 +5,7 @@ import swaggerUi from 'swagger-ui-express';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './auth';
 import acervoRouter from './routers/acervoRouter';
+import doiRouter from './routers/doiRouter';
 import { swaggerSpec } from './config/swagger';
 
 dotenv.config();
@@ -42,6 +43,7 @@ app.get('/', (req, res) => {
       health: `${baseUrl}/api/v1/health`,
       docs: `${baseUrl}/api/v1/docs`,
       openapi_json: `${baseUrl}/api/v1/openapi.json`,
+      doi: `${baseUrl}/api/v1/doi?doi=10.1038/nature12373`,
       auth: `${baseUrl}/api/v1/auth`,
       acervo: `${baseUrl}/api/v1/acervo`,
     },
@@ -61,6 +63,7 @@ app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.all('/api/v1/auth/*', toNodeHandler(auth));
 
+app.use('/api/v1/doi', doiRouter);
 app.use('/api/v1/acervo', acervoRouter);
 
 if (process.env.NODE_ENV !== 'test') {

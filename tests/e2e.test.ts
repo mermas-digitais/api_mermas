@@ -113,4 +113,11 @@ describe('Suíte E2E: Fluxo Completo de Usuário e Acervo', () => {
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
+
+  it('6. Deve buscar metadados de artigo via DOI', async () => {
+    const res = await request(app).get('/api/v1/doi?doi=10.1038/nature12373');
+    expect(res.status).toBe(200);
+    expect(res.body.doi).toBe('10.1038/nature12373');
+    expect(res.body.source).toBe('crossref');
+  });
 });

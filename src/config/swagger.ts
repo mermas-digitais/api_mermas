@@ -21,19 +21,14 @@ export const swaggerSpec = {
     },
   },
   servers: [
-    {
-      url: prodUrl,
-      description: 'Produção',
-    },
-    {
-      url: localUrl,
-      description: 'Desenvolvimento Local',
-    },
+    { url: prodUrl, description: 'Produção' },
+    { url: localUrl, description: 'Desenvolvimento Local' },
   ],
   tags: [
     { name: 'Geral', description: 'Endpoints de verificação e status da API' },
     { name: 'Autenticação', description: 'Cadastros, logins e gerenciamento de sessão via Better Auth' },
     { name: 'Acervo', description: 'Gestão de itens do acervo (jogos, artigos, materiais, certificados)' },
+    { name: 'DOI', description: 'Consulta de metadados bibliográficos por DOI via CrossRef' },
   ],
   security: [
     { bearerAuth: [] },
@@ -78,6 +73,24 @@ export const swaggerSpec = {
           userId: { type: 'string', nullable: true, example: 'user_12345' },
           createdAt: { type: 'string', format: 'date-time', example: '2026-08-21T04:30:00.000Z' },
           updatedAt: { type: 'string', format: 'date-time', example: '2026-08-21T04:30:00.000Z' },
+        },
+      },
+      DOIMetadata: {
+        type: 'object',
+        properties: {
+          doi: { type: 'string', example: '10.1038/nature12373' },
+          title: { type: 'string', example: 'Nanometre-scale thermometry in a living cell' },
+          authors: {
+            type: 'array',
+            items: { type: 'string' },
+            example: ['G. Baffou', 'H. Rigneault', 'D. Marguet', 'P. Lenne'],
+          },
+          publicationPlace: { type: 'string', example: 'Nature' },
+          type: { type: 'string', example: 'journal-article' },
+          year: { type: 'number', nullable: true, example: 2013 },
+          url: { type: 'string', example: 'https://doi.org/10.1038/nature12373' },
+          abstract: { type: 'string', nullable: true, example: 'Resumo do artigo...' },
+          source: { type: 'string', example: 'crossref' },
         },
       },
       User: {
@@ -152,6 +165,36 @@ export const swaggerSpec = {
         },
       },
     },
+    '/api/v1/doi': {
+      get: {
+        summary: 'Buscar metadados de artigo por DOI via CrossRef',
+        tags: ['DOI'],
+        security: [],
+        parameters: [
+          {
+            in: 'query',
+            name: 'doi',
+            required: true,
+            schema: { type: 'string' },
+            description: 'DOI do artigo (puro ou URL completa)',
+            example: '10.1038/nature12373',
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Metadados do artigo encontrados',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/DOIMetadata' },
+              },
+            },
+          },
+          '400': { description: 'DOI não informado' },
+          '404': { description: 'Nenhum artigo encontrado para o DOI informado' },
+          '500': { description: 'Erro ao consultar API externa' },
+        },
+      },
+    },
     '/api/v1/auth/sign-up/email': {
       post: {
         summary: 'Cadastrar novo usuário',
@@ -182,14 +225,7 @@ export const swaggerSpec = {
               },
             },
           },
-          '400': {
-            description: 'Dados inválidos ou e-mail já em uso',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
+          '400': { description: 'Dados inválidos ou e-mail já em uso' },
         },
       },
     },
@@ -222,14 +258,7 @@ export const swaggerSpec = {
               },
             },
           },
-          '401': {
-            description: 'Credenciais inválidas',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
+          '401': { description: 'Credenciais inválidas' },
         },
       },
     },
@@ -246,14 +275,7 @@ export const swaggerSpec = {
               },
             },
           },
-          '401': {
-            description: 'Nenhuma sessão ativa',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
+          '401': { description: 'Nenhuma sessão ativa' },
         },
       },
     },
@@ -262,9 +284,7 @@ export const swaggerSpec = {
         summary: 'Encerrar sessão do usuário (Logout)',
         tags: ['Autenticação'],
         responses: {
-          '200': {
-            description: 'Sessão encerrada com sucesso',
-          },
+          '200': { description: 'Sessão encerrada com sucesso' },
         },
       },
     },
@@ -277,10 +297,7 @@ export const swaggerSpec = {
           {
             in: 'query',
             name: 'type',
-            schema: {
-              type: 'string',
-              enum: ['jogo', 'artigo', 'material', 'certificado'],
-            },
+            schema: { type: 'string', enum: ['jogo', 'artigo', 'material', 'certificado'] },
             description: 'Filtrar por categoria do acervo',
           },
           {
@@ -316,31 +333,15 @@ export const swaggerSpec = {
                 required: ['title', 'type'],
                 properties: {
                   title: { type: 'string', example: 'Jogo Educativo de Programação' },
-                  description: { type: 'string', example: 'Jogo interativo desenvolvido para ensino de lógica.' },
-                  type: {
-                    type: 'string',
-                    enum: ['jogo', 'artigo', 'material', 'certificado'],
-                    example: 'jogo',
-                  },
-                  subType: { type: 'string', example: 'resumo expandido' },
-                  publicationPlace: { type: 'string', example: 'Revista de Tecnologia' },
-                  doi: { type: 'string', example: '10.1000/182' },
-                  authors: {
-                    type: 'string',
-                    description: 'Lista de autores (array JSON ou separados por vírgula)',
-                    example: 'Ana Silva, Carlos Souza',
-                  },
-                  externalUrl: { type: 'string', example: 'https://exemplo.com/artigo.pdf' },
-                  images: {
-                    type: 'array',
-                    items: { type: 'string', format: 'binary' },
-                    description: 'Até 5 imagens para o item',
-                  },
-                  attachment: {
-                    type: 'string',
-                    format: 'binary',
-                    description: 'Arquivo para download (PDF, ZIP, etc.)',
-                  },
+                  description: { type: 'string' },
+                  type: { type: 'string', enum: ['jogo', 'artigo', 'material', 'certificado'] },
+                  subType: { type: 'string' },
+                  publicationPlace: { type: 'string' },
+                  doi: { type: 'string' },
+                  authors: { type: 'string', description: 'JSON array ou vírgula separada' },
+                  externalUrl: { type: 'string' },
+                  images: { type: 'array', items: { type: 'string', format: 'binary' } },
+                  attachment: { type: 'string', format: 'binary' },
                 },
               },
             },
@@ -355,22 +356,8 @@ export const swaggerSpec = {
               },
             },
           },
-          '400': {
-            description: 'Campos obrigatórios ausentes ou tipo inválido',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
-          '401': {
-            description: 'Não autorizado',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
+          '400': { description: 'Campos obrigatórios ausentes ou tipo inválido' },
+          '401': { description: 'Não autorizado' },
         },
       },
     },
@@ -380,12 +367,7 @@ export const swaggerSpec = {
         tags: ['Acervo'],
         security: [],
         parameters: [
-          {
-            in: 'path',
-            name: 'id',
-            required: true,
-            schema: { type: 'string' },
-          },
+          { in: 'path', name: 'id', required: true, schema: { type: 'string' } },
         ],
         responses: {
           '200': {
@@ -396,26 +378,14 @@ export const swaggerSpec = {
               },
             },
           },
-          '404': {
-            description: 'Item não encontrado',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
+          '404': { description: 'Item não encontrado' },
         },
       },
       put: {
         summary: 'Atualizar item do acervo',
         tags: ['Acervo'],
         parameters: [
-          {
-            in: 'path',
-            name: 'id',
-            required: true,
-            schema: { type: 'string' },
-          },
+          { in: 'path', name: 'id', required: true, schema: { type: 'string' } },
         ],
         requestBody: {
           content: {
@@ -447,34 +417,15 @@ export const swaggerSpec = {
               },
             },
           },
-          '404': {
-            description: 'Item não encontrado',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
-          '401': {
-            description: 'Não autorizado',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
+          '404': { description: 'Item não encontrado' },
+          '401': { description: 'Não autorizado' },
         },
       },
       delete: {
         summary: 'Deletar item do acervo',
         tags: ['Acervo'],
         parameters: [
-          {
-            in: 'path',
-            name: 'id',
-            required: true,
-            schema: { type: 'string' },
-          },
+          { in: 'path', name: 'id', required: true, schema: { type: 'string' } },
         ],
         responses: {
           '200': {
@@ -491,22 +442,8 @@ export const swaggerSpec = {
               },
             },
           },
-          '404': {
-            description: 'Item não encontrado',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
-          '401': {
-            description: 'Não autorizado',
-            content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/ErrorResponse' },
-              },
-            },
-          },
+          '404': { description: 'Item não encontrado' },
+          '401': { description: 'Não autorizado' },
         },
       },
     },
