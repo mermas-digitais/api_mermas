@@ -10,6 +10,11 @@ export interface FileMetadata {
   size?: number;
 }
 
+export function getProxiedUrl(key: string, baseUrl?: string): string {
+  const host = baseUrl || 'https://mdapi.fabitz.com.br';
+  return `${host}/api/v1/images/${key}`;
+}
+
 export async function uploadToS3(
   file: Express.Multer.File,
   folder = 'acervo'
@@ -26,8 +31,7 @@ export async function uploadToS3(
 
   await s3Client.send(command);
 
-  const endpoint = (process.env.S3_ENDPOINT || 'http://localhost:3900').replace(/\/$/, '');
-  const url = `${endpoint}/${S3_BUCKET_NAME}/${fileKey}`;
+  const url = getProxiedUrl(fileKey);
 
   return {
     url,
