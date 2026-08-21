@@ -146,6 +146,23 @@ export const swaggerSpec = {
           message: { type: 'string', example: 'Mensagem explicativa do erro' },
         },
       },
+      ImportResponse: {
+        type: 'object',
+        properties: {
+          imported: { type: 'number', example: 10, description: 'Número de itens importados com sucesso' },
+          totalRows: { type: 'number', example: 12, description: 'Total de linhas no CSV' },
+          errors: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                row: { type: 'number', example: 5, description: 'Número da linha com erro' },
+                message: { type: 'string', example: 'Título obrigatório ausente' },
+              },
+            },
+          },
+        },
+      },
     },
     securitySchemes: {
       bearerAuth: {
@@ -306,6 +323,43 @@ export const swaggerSpec = {
         tags: ['Autenticação'],
         responses: {
           '200': { description: 'Sessão encerrada com sucesso' },
+        },
+      },
+    },
+    '/api/v1/acervo/import': {
+      post: {
+        summary: 'Importar itens do acervo em massa via CSV',
+        tags: ['Acervo'],
+        description: 'Realiza importação em massa a partir de um CSV. Colunas obrigatórias: title, type. Colunas opcionais: description, subType, publicationPlace, publicationYear, doi, authors, externalUrl. Autores devem ser separados por vírgula. Imagens e anexos não são incluídos no CSV.',
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['file'],
+                properties: {
+                  file: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'Arquivo CSV com os dados do acervo',
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'Importação concluída',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/ImportResponse' },
+              },
+            },
+          },
+          '400': { description: 'Erro de validação ou formato do CSV' },
+          '401': { description: 'Não autorizado' },
         },
       },
     },

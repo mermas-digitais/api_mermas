@@ -5,6 +5,7 @@ import swaggerUi from 'swagger-ui-express';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './auth';
 import acervoRouter from './routers/acervoRouter';
+import acervoImportRouter from './routers/acervoImportRouter';
 import doiRouter from './routers/doiRouter';
 import imageProxyController from './controllers/imageProxyController';
 import { swaggerSpec } from './config/swagger';
@@ -48,6 +49,7 @@ app.get('/', (req, res) => {
       images: `${baseUrl}/api/v1/images/{key}`,
       auth: `${baseUrl}/api/v1/auth`,
       acervo: `${baseUrl}/api/v1/acervo`,
+      acervo_import: `${baseUrl}/api/v1/acervo/import`,
     },
   });
 });
@@ -68,6 +70,7 @@ app.all('/api/v1/auth/*', toNodeHandler(auth));
 app.get('/api/v1/images/*', imageProxyController.serveImage);
 
 app.use('/api/v1/doi', doiRouter);
+app.use('/api/v1/acervo', acervoImportRouter);
 app.use('/api/v1/acervo', acervoRouter);
 
 if (process.env.NODE_ENV !== 'test') {
