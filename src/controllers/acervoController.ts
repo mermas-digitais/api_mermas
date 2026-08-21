@@ -140,12 +140,15 @@ export const acervoController = {
 
       let updatedImages = existing.images || [];
       if (imageFiles.length > 0) {
+        for (const img of updatedImages) {
+          if (img.key) await deleteFromS3(img.key);
+        }
         const newImages: FileMetadata[] = [];
         for (const file of imageFiles) {
           const uploaded = await uploadToS3(file, 'acervo/images');
           newImages.push(uploaded);
         }
-        updatedImages = [...updatedImages, ...newImages];
+        updatedImages = newImages;
       }
 
       let updatedAttachment = existing.attachment;
