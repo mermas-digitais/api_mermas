@@ -28,7 +28,7 @@ const SORT_FIELDS = {
 export const acervoController = {
   createItem: async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { title, description, type, subType, publicationPlace, externalUrl, doi, authors } = req.body;
+      const { title, description, type, subType, publicationPlace, publicationYear, externalUrl, doi, authors } = req.body;
 
       if (!title || !type) {
         return res.status(400).json({ message: 'Título e tipo são obrigatórios' });
@@ -66,6 +66,7 @@ export const acervoController = {
           type: type as AcervoType,
           subType: subType || null,
           publicationPlace: publicationPlace || null,
+          publicationYear: publicationYear || null,
           images,
           attachment,
           externalUrl: externalUrl || null,
@@ -173,7 +174,7 @@ export const acervoController = {
   updateItem: async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
-      const { title, description, type, subType, publicationPlace, externalUrl, doi, authors } = req.body;
+      const { title, description, type, subType, publicationPlace, publicationYear, externalUrl, doi, authors } = req.body;
 
       const [existing] = await db.select().from(acervo).where(eq(acervo.id, id));
       if (!existing) {
@@ -221,6 +222,7 @@ export const acervoController = {
           ...(type && { type: type as AcervoType }),
           ...(subType !== undefined && { subType }),
           ...(publicationPlace !== undefined && { publicationPlace }),
+          ...(publicationYear !== undefined && { publicationYear }),
           ...(externalUrl !== undefined && { externalUrl }),
           ...(doi !== undefined && { doi }),
           authors: parsedAuthors,

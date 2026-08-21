@@ -70,6 +70,7 @@ describe('Suíte E2E: Fluxo Completo de Usuário e Acervo', () => {
       .field('type', 'artigo')
       .field('subType', 'resumo expandido')
       .field('publicationPlace', 'Revista E2E')
+      .field('publicationYear', '2026')
       .field('doi', '10.1234/e2etest')
       .field('authors', 'Autor E2E 1, Autor E2E 2')
       .field('externalUrl', 'https://exemplo.com/artigo.pdf');

@@ -55,6 +55,7 @@ export const swaggerSpec = {
           type: { type: 'string', enum: ['jogo', 'artigo', 'material', 'certificado'], example: 'artigo' },
           subType: { type: 'string', nullable: true, example: 'resumo expandido' },
           publicationPlace: { type: 'string', nullable: true, example: 'Revista Brasileira de Computação' },
+          publicationYear: { type: 'string', nullable: true, example: '2024', description: 'Ano de publicação (formato: AAAA)' },
           doi: { type: 'string', nullable: true, example: '10.1000/182' },
           authors: {
             type: 'array',
@@ -398,6 +399,7 @@ export const swaggerSpec = {
                   type: { type: 'string', enum: ['jogo', 'artigo', 'material', 'certificado'] },
                   subType: { type: 'string' },
                   publicationPlace: { type: 'string' },
+                  publicationYear: { type: 'string', description: 'Ano de publicação (formato: AAAA)', example: '2024' },
                   doi: { type: 'string' },
                   authors: { type: 'string', description: 'JSON array ou vírgula separada' },
                   externalUrl: { type: 'string' },
@@ -459,6 +461,7 @@ export const swaggerSpec = {
                   type: { type: 'string', enum: ['jogo', 'artigo', 'material', 'certificado'] },
                   subType: { type: 'string' },
                   publicationPlace: { type: 'string' },
+                  publicationYear: { type: 'string', description: 'Ano de publicação (formato: AAAA)' },
                   doi: { type: 'string' },
                   authors: { type: 'string' },
                   externalUrl: { type: 'string' },

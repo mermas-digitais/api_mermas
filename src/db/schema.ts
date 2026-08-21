@@ -64,6 +64,7 @@ export const acervo = pgTable('acervo', {
   type: text('type').$type<AcervoType>().notNull(),
   subType: text('sub_type'),
   publicationPlace: text('publication_place'),
+  publicationYear: text('publication_year'),
   images: jsonb('images').$type<FileMetadata[]>().default([]).notNull(),
   attachment: jsonb('attachment').$type<FileMetadata | null>(),
   externalUrl: text('external_url'),
