@@ -5,17 +5,15 @@ import { s3Client, S3_BUCKET_NAME } from '../config/s3';
 export const imageProxyController = {
   serveImage: async (req: Request, res: Response) => {
     try {
-      const { key } = req.params;
+      const key = (req.params as any)[0];
 
       if (!key) {
         return res.status(400).json({ message: 'Chave do arquivo não informada' });
       }
 
-      const fullKey = `acervo/images/${key}`;
-
       const command = new GetObjectCommand({
         Bucket: S3_BUCKET_NAME,
-        Key: fullKey,
+        Key: key,
       });
 
       const response = await s3Client.send(command);

@@ -65,7 +65,7 @@ app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.all('/api/v1/auth/*', toNodeHandler(auth));
 
-app.get('/api/v1/images/:key', imageProxyController.serveImage);
+app.get('/api/v1/images/*', imageProxyController.serveImage);
 
 app.use('/api/v1/doi', doiRouter);
 app.use('/api/v1/acervo', acervoRouter);
